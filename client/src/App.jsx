@@ -13,7 +13,6 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // ✅ שלב ראשון – טעינת משימות מהשרת
   useEffect(() => {
     const fetchTasks = async () => {
       try {
@@ -29,7 +28,6 @@ export default function App() {
     fetchTasks();
   }, []);
 
-  // ✅ הוספת משימה
   const addTask = async (title) => {
     try {
       const res = await createTask(title);
@@ -40,7 +38,6 @@ export default function App() {
     }
   };
 
-  // ✅ שינוי סטטוס משימה (בוצע/לא בוצע)
   const toggleTask = async (id, completed) => {
     try {
       const res = await updateTask(id, { completed: !completed });
@@ -51,7 +48,6 @@ export default function App() {
     }
   };
 
-  // ✅ מחיקת משימה
   const removeTask = async (id) => {
     try {
       await deleteTask(id);
@@ -62,31 +58,24 @@ export default function App() {
     }
   };
 
-  // ✅ תוכן המסך
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-4">
-      <h1 className="text-3xl font-bold text-gray-800 mt-6 mb-4">
-        Task Manager
-      </h1>
+    <div className="min-vh-100 bg-light d-flex flex-column align-items-center py-5">
+      <div className="container" style={{ maxWidth: "500px" }}>
+        <h1 className="text-center mb-4 fw-bold text-primary">Task Manager</h1>
 
-      <div className="w-full max-w-md">
         <TaskForm onAdd={addTask} />
+
+        {loading && <p className="text-secondary text-center mt-4">טוען משימות...</p>}
+        {error && <p className="text-danger text-center mt-2">{error}</p>}
+
+        {!loading && !error && (
+          <TaskList tasks={tasks} onToggle={toggleTask} onDelete={removeTask} />
+        )}
+
+        {tasks.length === 0 && !loading && !error && (
+          <p className="text-muted text-center mt-4">אין משימות כרגע</p>
+        )}
       </div>
-
-      {loading && <p className="text-gray-600 mt-4">טוען משימות...</p>}
-      {error && <p className="text-red-500 mt-2">{error}</p>}
-
-      {!loading && !error && (
-        <TaskList
-          tasks={tasks}
-          onToggle={toggleTask}
-          onDelete={removeTask}
-        />
-      )}
-
-      {tasks.length === 0 && !loading && !error && (
-        <p className="text-gray-500 mt-6">אין משימות כרגע</p>
-      )}
     </div>
   );
 }

@@ -11,14 +11,16 @@ export default function TaskForm({ onAdd }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex w-full max-w-md mb-4">
+    <form onSubmit={handleSubmit} className="input-group mb-4 shadow-sm">
       <input
         value={title}
         onChange={e => setTitle(e.target.value)}
         placeholder="Enter new task..."
-        className="flex-1 p-2 border border-gray-300 rounded-l"
+        className="form-control"
       />
-      <button className="bg-blue-600 text-white px-4 rounded-r hover:bg-blue-700">Add</button>
+      <button type="submit" className="btn btn-primary">
+        Add
+      </button>
     </form>
   );
 }

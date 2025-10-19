@@ -1,27 +1,28 @@
 export default function TaskList({ tasks, onToggle, onDelete }) {
   return (
-    <div className="w-full max-w-md space-y-2">
+    <ul className="list-group shadow-sm">
       {tasks.map((task) => (
-        <div
-          key={task.id} // ✅ מזהה ייחודי לכל רכיב
-          className="flex justify-between items-center bg-white p-3 rounded shadow"
+        <li
+          key={task.id}
+          className={`list-group-item d-flex justify-content-between align-items-center ${
+            task.completed ? "list-group-item-secondary" : ""
+          }`}
         >
           <span
             onClick={() => onToggle(task.id, task.completed)}
-            className={`cursor-pointer flex-1 ${
-              task.completed ? "line-through text-gray-400" : ""
-            }`}
+            className={`flex-grow-1 ${task.completed ? "text-decoration-line-through text-muted" : "fw-semibold"}`}
+            style={{ cursor: "pointer" }}
           >
             {task.title}
           </span>
           <button
             onClick={() => onDelete(task.id)}
-            className="text-red-500 hover:text-red-700"
+            className="btn btn-sm btn-outline-danger ms-3"
           >
             ✕
           </button>
-        </div>
+        </li>
       ))}
-    </div>
+    </ul>
   );
 }
