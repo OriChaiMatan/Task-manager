@@ -1,39 +1,109 @@
 {
   "tasks": [
     {
+      "id": "1760880990867",
+      "title": "להעלות את הפרויקט",
+      "completed": false
+    },
+    {
       "id": "1760880831442",
-      "title": "אורי3",
+      "title": "לסיים את פרויקט React",
       "completed": true
     },
     {
       "id": "1760880829459",
-      "title": "אורי2",
+      "title": "לבדוק באגים באפליקציה",
       "completed": false
     },
     {
       "id": "1760880827040",
-      "title": "אורי 1",
+      "title": "להוסיף פיצ’ר מיון לפי תאריך",
       "completed": false
     },
     {
       "id": "1760880787838",
-      "title": "םוקףאינ,נע",
+      "title": "פגישה עם הלקוח ביום שלישי",
       "completed": true
     },
     {
       "id": "1760879863828",
-      "title": "שקגריקשרגרי",
-      "completed": true
+      "title": "לכתוב README מקצועי לפרויקט",
+      "completed": false
     },
     {
       "id": "1760879859132",
-      "title": "דכאעי",
-      "completed": false
+      "title": "לבדוק דפלוי ב־Render",
+      "completed": true
     },
     {
       "id": "1760878961475",
-      "title": "דדד",
+      "title": "לעדכן גרסה ב־package.json",
       "completed": false
+    },
+    {
+      "id": "1760878961500",
+      "title": "להוסיף אייקונים לעריכה ומחיקה",
+      "completed": true
+    },
+    {
+      "id": "1760878961520",
+      "title": "לבדוק חיבור CORS בין פרונט לשרת",
+      "completed": true
+    },
+    {
+      "id": "1760878961540",
+      "title": "להחליף את Tailwind ב־Bootstrap",
+      "completed": true
+    },
+    {
+      "id": "1760878961560",
+      "title": "להוסיף dark mode עם שמירה ב־localStorage",
+      "completed": true
+    },
+    {
+      "id": "1760878961580",
+      "title": "לסדר הודעות שגיאה ידידותיות יותר",
+      "completed": false
+    },
+    {
+      "id": "1760878961600",
+      "title": "לבדוק את ה־API של deleteTask",
+      "completed": false
+    },
+    {
+      "id": "1760878961620",
+      "title": "לעדכן עיצוב רספונסיבי למובייל",
+      "completed": true
+    },
+    {
+      "id": "1760878961640",
+      "title": "לבדוק שמירה אוטומטית ב־localStorage",
+      "completed": false
+    },
+    {
+      "id": "1760878961660",
+      "title": "ליצור טסט יחידה לפונקציית updateTask",
+      "completed": false
+    },
+    {
+      "id": "1760878961680",
+      "title": "להוסיף פס ספירה בזמן אמת",
+      "completed": true
+    },
+    {
+      "id": "1760878961700",
+      "title": "לבדוק נגישות (Accessibility)",
+      "completed": false
+    },
+    {
+      "id": "1760878961720",
+      "title": "לשפר את הביצועים עם useMemo",
+      "completed": false
+    },
+    {
+      "id": "1760878961740",
+      "title": "להוסיף favicon לאפליקציה",
+      "completed": true
     }
   ]
 }
