@@ -7,8 +7,9 @@ export default function App() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [filter, setFilter] = useState("all"); // ✅ חדש
 
-  // ✅ טעינה ראשונית — קודם מהמכשיר, ואז מהשרת
+  // טעינה ראשונית
   useEffect(() => {
     const savedTasks = localStorage.getItem("tasks");
     if (savedTasks) {
@@ -31,14 +32,12 @@ export default function App() {
     fetchTasks();
   }, []);
 
-  // ✅ סנכרון מתמשך — כל פעם שמשימות משתנות, נשמור ל־localStorage
   useEffect(() => {
     if (tasks.length > 0) {
       localStorage.setItem("tasks", JSON.stringify(tasks));
     }
   }, [tasks]);
 
-  // ✅ הוספת משימה
   const addTask = async (title) => {
     try {
       const res = await createTask(title);
@@ -50,7 +49,6 @@ export default function App() {
     }
   };
 
-  // ✅ שינוי סטטוס משימה
   const toggleTask = async (id, completed) => {
     try {
       const res = await updateTask(id, { completed: !completed });
@@ -62,7 +60,6 @@ export default function App() {
     }
   };
 
-  // ✅ מחיקת משימה
   const removeTask = async (id) => {
     try {
       await deleteTask(id);
@@ -74,6 +71,13 @@ export default function App() {
     }
   };
 
+  // ✅ מסנן לפי סוג המשימות
+  const filteredTasks = tasks.filter((task) => {
+    if (filter === "completed") return task.completed;
+    if (filter === "pending") return !task.completed;
+    return true;
+  });
+
   return (
     <div className="min-vh-100 bg-light py-5">
       <div className="container" style={{ maxWidth: "600px" }}>
@@ -81,15 +85,37 @@ export default function App() {
 
         <TaskForm onAdd={addTask} />
 
+        {/* ✅ כפתורי פילטר */}
+        <div className="d-flex justify-content-center gap-2 mb-4">
+          <button
+            className={`btn ${filter === "all" ? "btn-primary" : "btn-outline-primary"}`}
+            onClick={() => setFilter("all")}
+          >
+            All
+          </button>
+          <button
+            className={`btn ${filter === "pending" ? "btn-warning text-dark" : "btn-outline-warning"}`}
+            onClick={() => setFilter("pending")}
+          >
+            Pending
+          </button>
+          <button
+            className={`btn ${filter === "completed" ? "btn-success" : "btn-outline-success"}`}
+            onClick={() => setFilter("completed")}
+          >
+            Completed
+          </button>
+        </div>
+
         {loading && <p className="text-secondary text-center mt-4">טוען משימות...</p>}
         {error && <p className="text-danger text-center mt-2">{error}</p>}
 
         {!loading && !error && (
-          <TaskList tasks={tasks} onToggle={toggleTask} onDelete={removeTask} />
+          <TaskList tasks={filteredTasks} onToggle={toggleTask} onDelete={removeTask} />
         )}
 
-        {tasks.length === 0 && !loading && !error && (
-          <p className="text-muted text-center mt-4">אין משימות כרגע</p>
+        {filteredTasks.length === 0 && !loading && !error && (
+          <p className="text-muted text-center mt-4">אין משימות להצגה</p>
         )}
       </div>
     </div>
