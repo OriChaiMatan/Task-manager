@@ -8,7 +8,6 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// יצירת שרת
 const app = express();
 const server = createServer(app);
 
@@ -19,14 +18,36 @@ const __dirname = path.dirname(__filename);
 // יצירת פורט
 const PORT = process.env.PORT || 5001;
 
-// ✅ טיפול גלובלי ב־CORS לכל הסביבות
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  if (req.method === "OPTIONS") return res.sendStatus(200);
-  next();
-});
+// ✅ זיהוי סביבת עבודה
+const isProduction = process.env.NODE_ENV === "production";
+console.log(`🌍 Environment: ${isProduction ? "Production" : "Development"}`);
+
+// ✅ טיפול ב־CORS לפי סביבה
+if (!isProduction) {
+  // מצב פיתוח (localhost)
+  app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "http://localhost:5173");
+    res.header(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PUT, DELETE, OPTIONS"
+    );
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    if (req.method === "OPTIONS") return res.sendStatus(200);
+    next();
+  });
+} else {
+  // פרודקשן — ניתן לפתוח לכולם או להגדיר דומיין ספציפי
+  app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PUT, DELETE, OPTIONS"
+    );
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    if (req.method === "OPTIONS") return res.sendStatus(200);
+    next();
+  });
+}
 
 app.use(cookieParser());
 app.use(express.json());
@@ -64,7 +85,7 @@ app.post("/api/tasks", (req, res) => {
 
 app.put("/api/tasks/:id", (req, res) => {
   const db = readDB();
-  const idx = db.tasks.findIndex(t => t.id === req.params.id);
+  const idx = db.tasks.findIndex((t) => t.id === req.params.id);
   if (idx === -1) return res.status(404).json({ message: "Task not found" });
   db.tasks[idx] = { ...db.tasks[idx], ...req.body };
   writeDB(db);
@@ -73,19 +94,24 @@ app.put("/api/tasks/:id", (req, res) => {
 
 app.delete("/api/tasks/:id", (req, res) => {
   const db = readDB();
-  db.tasks = db.tasks.filter(t => t.id !== req.params.id);
+  db.tasks = db.tasks.filter((t) => t.id !== req.params.id);
   writeDB(db);
   res.json({ message: "Task deleted" });
 });
 
-// ✅ הגשת React Build בפרודקשן
-app.get("/**", (req, res) => {
-  if (process.env.NODE_ENV === "production") {
-    res.sendFile(path.resolve("client/dist/index.html"));
-  } else {
-    res.status(404).send("Development mode – React served separately.");
-  }
-});
+// ✅ הגשת React Build בפרודקשן בלבד
+if (isProduction) {
+  const clientPath = path.resolve(__dirname, "../client/dist");
+  app.use(express.static(clientPath));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(clientPath, "index.html"));
+  });
+} else {
+  app.get("/", (req, res) => {
+    res.send("Development mode – React runs separately on http://localhost:5173");
+  });
+}
 
 // ✅ הפעלת השרת
 server.listen(PORT, () => {
