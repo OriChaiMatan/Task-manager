@@ -8,6 +8,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [filter, setFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("newest"); // ✅ חדש
   const [theme, setTheme] = useState("light");
 
   // --- טוען נושא עיצוב
@@ -57,7 +58,8 @@ export default function App() {
   const addTask = async (title) => {
     try {
       const res = await createTask(title);
-      const newList = [res.data, ...tasks];
+      const newTask = { ...res.data, createdAt: new Date().toISOString() };
+      const newList = [newTask, ...tasks];
       setTasks(newList);
       localStorage.setItem("tasks", JSON.stringify(newList));
     } catch {
@@ -98,18 +100,37 @@ export default function App() {
     }
   };
 
-  // --- סינון משימות
+  // --- סינון
   const filteredTasks = tasks.filter((task) => {
     if (filter === "completed") return task.completed;
     if (filter === "pending") return !task.completed;
     return true;
   });
 
-  // --- חישובי ספירה בזמן אמת
+  // --- מיון
+  const sortedTasks = [...filteredTasks].sort((a, b) => {
+    switch (sortBy) {
+      case "az":
+        return a.title.localeCompare(b.title);
+      case "za":
+        return b.title.localeCompare(a.title);
+      case "oldest":
+        return new Date(a.id) - new Date(b.id);
+      case "newest":
+        return new Date(b.id) - new Date(a.id);
+      case "status":
+        return Number(a.completed) - Number(b.completed);
+      default:
+        return 0;
+    }
+  });
+
+  // --- ספירה
   const total = tasks.length;
   const completed = tasks.filter((t) => t.completed).length;
   const pending = total - completed;
 
+  // --- רינדור
   return (
     <div
       className={`min-vh-100 py-5 ${
@@ -130,11 +151,10 @@ export default function App() {
           </button>
         </div>
 
-        {/* טופס הוספה */}
         <TaskForm onAdd={addTask} />
 
         {/* מסננים */}
-        <div className="d-flex justify-content-center gap-2 mb-3">
+        <div className="d-flex justify-content-center gap-2 mb-3 flex-wrap">
           <button
             className={`btn ${
               filter === "all" ? "btn-primary" : "btn-outline-primary"
@@ -159,37 +179,41 @@ export default function App() {
           >
             Completed
           </button>
+
+          {/* 🔽 תפריט מיון */}
+          <select
+            className="form-select w-auto ms-2"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+          >
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="az">A → Z</option>
+            <option value="za">Z → A</option>
+            <option value="status">By status</option>
+          </select>
         </div>
 
-        {/* ✅ פס סטטיסטיקה */}
+        {/* פס סטטיסטיקה */}
         <div className="text-center mb-4">
-          <span className="badge bg-secondary me-2">
-            סה״כ: {total}
-          </span>
-          <span className="badge bg-success me-2">
-            הושלמו: {completed}
-          </span>
-          <span className="badge bg-warning text-dark">
-            פתוחות: {pending}
-          </span>
+          <span className="badge bg-secondary me-2">סה״כ: {total}</span>
+          <span className="badge bg-success me-2">הושלמו: {completed}</span>
+          <span className="badge bg-warning text-dark">פתוחות: {pending}</span>
         </div>
 
-        {/* הודעות מצב */}
         {loading && <p className="text-secondary text-center mt-4">טוען משימות...</p>}
         {error && <p className="text-danger text-center mt-2">{error}</p>}
 
-        {/* רשימת משימות */}
         {!loading && !error && (
           <TaskList
-            tasks={filteredTasks}
+            tasks={sortedTasks}
             onToggle={toggleTask}
             onDelete={removeTask}
             onEdit={editTask}
           />
         )}
 
-        {/* אין משימות */}
-        {filteredTasks.length === 0 && !loading && !error && (
+        {sortedTasks.length === 0 && !loading && !error && (
           <p className="text-muted text-center mt-4">אין משימות להצגה</p>
         )}
       </div>
