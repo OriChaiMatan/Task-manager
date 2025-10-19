@@ -1,37 +1,92 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import {
+  getTasks,
+  createTask,
+  updateTask,
+  deleteTask
+} from "./api";
 import TaskForm from "./components/TaskForm";
 import TaskList from "./components/TaskList";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-
 export default function App() {
   const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
+  // ✅ שלב ראשון – טעינת משימות מהשרת
   useEffect(() => {
-    axios.get(`${API_URL}/tasks`).then(res => setTasks(res.data));
+    const fetchTasks = async () => {
+      try {
+        const res = await getTasks();
+        setTasks(res.data);
+      } catch (err) {
+        console.error("❌ Failed to fetch tasks:", err);
+        setError("לא ניתן לטעון את המשימות מהשרת");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTasks();
   }, []);
 
+  // ✅ הוספת משימה
   const addTask = async (title) => {
-    const res = await axios.post(`${API_URL}/tasks`, { title });
-    setTasks([res.data, ...tasks]);
+    try {
+      const res = await createTask(title);
+      setTasks([res.data, ...tasks]);
+    } catch (err) {
+      console.error("❌ Failed to create task:", err);
+      setError("שגיאה בהוספת משימה");
+    }
   };
 
+  // ✅ שינוי סטטוס משימה (בוצע/לא בוצע)
   const toggleTask = async (id, completed) => {
-    const res = await axios.put(`${API_URL}/tasks/${id}`, { completed: !completed });
-    setTasks(tasks.map(t => t._id === id ? res.data : t));
+    try {
+      const res = await updateTask(id, { completed: !completed });
+      setTasks(tasks.map(t => (t.id === id ? res.data : t)));
+    } catch (err) {
+      console.error("❌ Failed to update task:", err);
+      setError("שגיאה בעדכון המשימה");
+    }
   };
 
-  const deleteTask = async (id) => {
-    await axios.delete(`${API_URL}/tasks/${id}`);
-    setTasks(tasks.filter(t => t._id !== id));
+  // ✅ מחיקת משימה
+  const removeTask = async (id) => {
+    try {
+      await deleteTask(id);
+      setTasks(tasks.filter(t => t.id !== id));
+    } catch (err) {
+      console.error("❌ Failed to delete task:", err);
+      setError("שגיאה במחיקת המשימה");
+    }
   };
 
+  // ✅ תוכן המסך
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-4">
-      <h1 className="text-3xl font-bold text-gray-800 my-4">Task Manager</h1>
-      <TaskForm onAdd={addTask} />
-      <TaskList tasks={tasks} onToggle={toggleTask} onDelete={deleteTask} />
+      <h1 className="text-3xl font-bold text-gray-800 mt-6 mb-4">
+        Task Manager
+      </h1>
+
+      <div className="w-full max-w-md">
+        <TaskForm onAdd={addTask} />
+      </div>
+
+      {loading && <p className="text-gray-600 mt-4">טוען משימות...</p>}
+      {error && <p className="text-red-500 mt-2">{error}</p>}
+
+      {!loading && !error && (
+        <TaskList
+          tasks={tasks}
+          onToggle={toggleTask}
+          onDelete={removeTask}
+        />
+      )}
+
+      {tasks.length === 0 && !loading && !error && (
+        <p className="text-gray-500 mt-6">אין משימות כרגע</p>
+      )}
     </div>
   );
 }

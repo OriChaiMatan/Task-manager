@@ -1,3 +1,19 @@
 {
-  "tasks": []
+  "tasks": [
+    {
+      "id": "1760878810274",
+      "title": "ללללללל",
+      "completed": false
+    },
+    {
+      "id": "1760878806733",
+      "title": "ללכת לשחק",
+      "completed": false
+    },
+    {
+      "id": "1760878798892",
+      "title": "להוריד את כלב",
+      "completed": false
+    }
+  ]
 }
