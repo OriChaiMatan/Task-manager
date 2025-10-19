@@ -8,11 +8,19 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // ✅ טעינה ראשונית — קודם מהמכשיר, ואז מהשרת
   useEffect(() => {
+    const savedTasks = localStorage.getItem("tasks");
+    if (savedTasks) {
+      setTasks(JSON.parse(savedTasks));
+      setLoading(false);
+    }
+
     const fetchTasks = async () => {
       try {
         const res = await getTasks();
         setTasks(res.data);
+        localStorage.setItem("tasks", JSON.stringify(res.data));
       } catch (err) {
         console.error("❌ Failed to fetch tasks:", err);
         setError("לא ניתן לטעון את המשימות מהשרת");
@@ -23,28 +31,44 @@ export default function App() {
     fetchTasks();
   }, []);
 
+  // ✅ סנכרון מתמשך — כל פעם שמשימות משתנות, נשמור ל־localStorage
+  useEffect(() => {
+    if (tasks.length > 0) {
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+    }
+  }, [tasks]);
+
+  // ✅ הוספת משימה
   const addTask = async (title) => {
     try {
       const res = await createTask(title);
-      setTasks([res.data, ...tasks]);
+      const newList = [res.data, ...tasks];
+      setTasks(newList);
+      localStorage.setItem("tasks", JSON.stringify(newList));
     } catch {
       setError("שגיאה בהוספת משימה");
     }
   };
 
+  // ✅ שינוי סטטוס משימה
   const toggleTask = async (id, completed) => {
     try {
       const res = await updateTask(id, { completed: !completed });
-      setTasks(tasks.map((t) => (t.id === id ? res.data : t)));
+      const newList = tasks.map((t) => (t.id === id ? res.data : t));
+      setTasks(newList);
+      localStorage.setItem("tasks", JSON.stringify(newList));
     } catch {
       setError("שגיאה בעדכון המשימה");
     }
   };
 
+  // ✅ מחיקת משימה
   const removeTask = async (id) => {
     try {
       await deleteTask(id);
-      setTasks(tasks.filter((t) => t.id !== id));
+      const newList = tasks.filter((t) => t.id !== id);
+      setTasks(newList);
+      localStorage.setItem("tasks", JSON.stringify(newList));
     } catch {
       setError("שגיאה במחיקת המשימה");
     }
