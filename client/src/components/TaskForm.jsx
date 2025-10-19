@@ -3,7 +3,7 @@ import { useState } from "react";
 export default function TaskForm({ onAdd }) {
   const [title, setTitle] = useState("");
 
-  const handleSubmit = e => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (!title.trim()) return;
     onAdd(title);
@@ -13,13 +13,14 @@ export default function TaskForm({ onAdd }) {
   return (
     <form onSubmit={handleSubmit} className="input-group mb-4 shadow-sm">
       <input
+        type="text"
         value={title}
-        onChange={e => setTitle(e.target.value)}
-        placeholder="Enter new task..."
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="Add a new task..."
         className="form-control"
       />
       <button type="submit" className="btn btn-primary">
-        Add
+        Add Task
       </button>
     </form>
   );

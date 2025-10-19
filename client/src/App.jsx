@@ -1,10 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  getTasks,
-  createTask,
-  updateTask,
-  deleteTask
-} from "./api";
+import { getTasks, createTask, updateTask, deleteTask } from "./api";
 import TaskForm from "./components/TaskForm";
 import TaskList from "./components/TaskList";
 
@@ -32,8 +27,7 @@ export default function App() {
     try {
       const res = await createTask(title);
       setTasks([res.data, ...tasks]);
-    } catch (err) {
-      console.error("❌ Failed to create task:", err);
+    } catch {
       setError("שגיאה בהוספת משימה");
     }
   };
@@ -41,9 +35,8 @@ export default function App() {
   const toggleTask = async (id, completed) => {
     try {
       const res = await updateTask(id, { completed: !completed });
-      setTasks(tasks.map(t => (t.id === id ? res.data : t)));
-    } catch (err) {
-      console.error("❌ Failed to update task:", err);
+      setTasks(tasks.map((t) => (t.id === id ? res.data : t)));
+    } catch {
       setError("שגיאה בעדכון המשימה");
     }
   };
@@ -51,16 +44,15 @@ export default function App() {
   const removeTask = async (id) => {
     try {
       await deleteTask(id);
-      setTasks(tasks.filter(t => t.id !== id));
-    } catch (err) {
-      console.error("❌ Failed to delete task:", err);
+      setTasks(tasks.filter((t) => t.id !== id));
+    } catch {
       setError("שגיאה במחיקת המשימה");
     }
   };
 
   return (
-    <div className="min-vh-100 bg-light d-flex flex-column align-items-center py-5">
-      <div className="container" style={{ maxWidth: "500px" }}>
+    <div className="min-vh-100 bg-light py-5">
+      <div className="container" style={{ maxWidth: "600px" }}>
         <h1 className="text-center mb-4 fw-bold text-primary">Task Manager</h1>
 
         <TaskForm onAdd={addTask} />
