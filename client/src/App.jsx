@@ -8,16 +8,17 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [filter, setFilter] = useState("all");
-  const [theme, setTheme] = useState("light"); // ✅ מצב תאורה
+  const [theme, setTheme] = useState("light");
 
-  // טעינת נושא צבעים
+  // ✅ טוען נושא עיצוב מה-localStorage
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") || "light";
     setTheme(savedTheme);
-    document.body.className = savedTheme === "dark" ? "bg-dark text-light" : "bg-light text-dark";
+    document.body.className =
+      savedTheme === "dark" ? "bg-dark text-light" : "bg-light text-dark";
   }, []);
 
-  // טעינת משימות
+  // ✅ טוען משימות מהשרת (וגיבוי מ-localStorage)
   useEffect(() => {
     const savedTasks = localStorage.getItem("tasks");
     if (savedTasks) {
@@ -39,20 +40,21 @@ export default function App() {
     fetchTasks();
   }, []);
 
+  // ✅ שומר ב-localStorage בכל שינוי
   useEffect(() => {
-    if (tasks.length > 0) {
-      localStorage.setItem("tasks", JSON.stringify(tasks));
-    }
+    localStorage.setItem("tasks", JSON.stringify(tasks));
   }, [tasks]);
 
-  // ✅ החלפת נושא
+  // ✅ החלפת מצב כהה/בהיר
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
     localStorage.setItem("theme", newTheme);
-    document.body.className = newTheme === "dark" ? "bg-dark text-light" : "bg-light text-dark";
+    document.body.className =
+      newTheme === "dark" ? "bg-dark text-light" : "bg-light text-dark";
   };
 
+  // ✅ הוספת משימה
   const addTask = async (title) => {
     try {
       const res = await createTask(title);
@@ -64,6 +66,7 @@ export default function App() {
     }
   };
 
+  // ✅ שינוי סטטוס משימה
   const toggleTask = async (id, completed) => {
     try {
       const res = await updateTask(id, { completed: !completed });
@@ -75,6 +78,7 @@ export default function App() {
     }
   };
 
+  // ✅ מחיקת משימה
   const removeTask = async (id) => {
     try {
       await deleteTask(id);
@@ -86,55 +90,92 @@ export default function App() {
     }
   };
 
+  // ✅ עריכת משימה במקום
+  const editTask = async (id, newTitle) => {
+    try {
+      const res = await updateTask(id, { title: newTitle });
+      const newList = tasks.map((t) => (t.id === id ? res.data : t));
+      setTasks(newList);
+      localStorage.setItem("tasks", JSON.stringify(newList));
+    } catch {
+      setError("שגיאה בעריכת המשימה");
+    }
+  };
+
+  // ✅ סינון משימות
   const filteredTasks = tasks.filter((task) => {
     if (filter === "completed") return task.completed;
     if (filter === "pending") return !task.completed;
     return true;
   });
 
+  // ✅ תצוגה
   return (
-    <div className={`min-vh-100 py-5 transition ${theme === "dark" ? "bg-dark text-light" : "bg-light text-dark"}`}>
+    <div
+      className={`min-vh-100 py-5 ${
+        theme === "dark" ? "bg-dark text-light" : "bg-light text-dark"
+      }`}
+    >
       <div className="container" style={{ maxWidth: "600px" }}>
+        {/* כותרת + כפתור מצב תאורה */}
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h1 className="fw-bold">Task Manager</h1>
           <button
-            className={`btn btn-sm ${theme === "dark" ? "btn-light" : "btn-dark"}`}
+            className={`btn btn-sm ${
+              theme === "dark" ? "btn-light" : "btn-dark"
+            }`}
             onClick={toggleTheme}
           >
             {theme === "dark" ? "☀️ Light" : "🌙 Dark"}
           </button>
         </div>
 
+        {/* טופס הוספה */}
         <TaskForm onAdd={addTask} />
 
+        {/* סינון */}
         <div className="d-flex justify-content-center gap-2 mb-4">
           <button
-            className={`btn ${filter === "all" ? "btn-primary" : "btn-outline-primary"}`}
+            className={`btn ${
+              filter === "all" ? "btn-primary" : "btn-outline-primary"
+            }`}
             onClick={() => setFilter("all")}
           >
             All
           </button>
           <button
-            className={`btn ${filter === "pending" ? "btn-warning text-dark" : "btn-outline-warning"}`}
+            className={`btn ${
+              filter === "pending" ? "btn-warning text-dark" : "btn-outline-warning"
+            }`}
             onClick={() => setFilter("pending")}
           >
             Pending
           </button>
           <button
-            className={`btn ${filter === "completed" ? "btn-success" : "btn-outline-success"}`}
+            className={`btn ${
+              filter === "completed" ? "btn-success" : "btn-outline-success"
+            }`}
             onClick={() => setFilter("completed")}
           >
             Completed
           </button>
         </div>
 
+        {/* הודעות מצב */}
         {loading && <p className="text-secondary text-center mt-4">טוען משימות...</p>}
         {error && <p className="text-danger text-center mt-2">{error}</p>}
 
+        {/* רשימת משימות */}
         {!loading && !error && (
-          <TaskList tasks={filteredTasks} onToggle={toggleTask} onDelete={removeTask} />
+          <TaskList
+            tasks={filteredTasks}
+            onToggle={toggleTask}
+            onDelete={removeTask}
+            onEdit={editTask}
+          />
         )}
 
+        {/* אין משימות */}
         {filteredTasks.length === 0 && !loading && !error && (
           <p className="text-muted text-center mt-4">אין משימות להצגה</p>
         )}

@@ -1,50 +1,82 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
 
-export default function TaskList({ tasks, onToggle, onDelete }) {
+export default function TaskList({ tasks, onToggle, onDelete, onEdit }) {
+  const [editingId, setEditingId] = useState(null);
+  const [editValue, setEditValue] = useState("");
+
+  const handleEdit = (task) => {
+    setEditingId(task.id);
+    setEditValue(task.title);
+  };
+
+  const handleSave = (id) => {
+    if (!editValue.trim()) return;
+    onEdit(id, editValue);
+    setEditingId(null);
+  };
+
   return (
-    <div className="row gy-3">
-      <AnimatePresence>
-        {tasks.map((task) => (
-          <motion.div
-            key={task.id}
-            className="col-12"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
+    <div className="w-100">
+      {tasks.map((task) => (
+        <div
+          key={task.id}
+          className={`d-flex align-items-center justify-content-between mb-2 p-3 rounded shadow-sm ${
+            task.completed ? "bg-success-subtle" : "bg-white"
+          }`}
+        >
+          {/* כפתור סטטוס */}
+          <button
+            className={"btn btn-sm me-2 btn-outline-primary"}
+            onClick={() => onToggle(task.id, task.completed)}
+            title={task.completed ? "סמן כלא בוצע" : "סמן כבוצע"}
           >
-            <div
-              className={`card shadow-sm border-0 ${
-                task.completed ? "bg-success-subtle" : "bg-white"
-              }`}
-            >
-              <div className="card-body d-flex justify-content-between align-items-center">
-                <div
-                  onClick={() => onToggle(task.id, task.completed)}
-                  style={{ cursor: "pointer" }}
-                  className={`d-flex align-items-center flex-grow-1 ${
-                    task.completed
-                      ? "text-muted text-decoration-line-through"
-                      : "fw-semibold"
-                  }`}
-                >
-                  <span className="me-2">
-                    {task.completed ? "✅" : "🕓"}
-                  </span>
-                  {task.title}
-                </div>
+            {task.completed ? "✅" : "⭕"}
+          </button>
 
-                <button
-                  onClick={() => onDelete(task.id)}
-                  className="btn btn-sm btn-outline-danger"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        ))}
-      </AnimatePresence>
+          {/* תוכן המשימה */}
+          <div className="flex-grow-1">
+            {editingId === task.id ? (
+              <input
+                type="text"
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onBlur={() => handleSave(task.id)}
+                onKeyDown={(e) => e.key === "Enter" && handleSave(task.id)}
+                autoFocus
+                className="form-control"
+              />
+            ) : (
+              <span
+                className={`cursor-pointer ${
+                  task.completed ? "text-decoration-line-through text-muted" : ""
+                }`}
+              >
+                {task.title}
+              </span>
+            )}
+          </div>
+
+          {/* אייקון עריכה */}
+          {editingId !== task.id && (
+            <button
+              className="btn btn-sm btn-outline-primary me-2"
+              onClick={() => handleEdit(task)}
+              title="ערוך משימה"
+            >
+              ✏️
+            </button>
+          )}
+
+          {/* כפתור מחיקה */}
+          <button
+            className="btn btn-sm btn-outline-danger"
+            onClick={() => onDelete(task.id)}
+            title="מחק משימה"
+          >
+            🗑️
+          </button>
+        </div>
+      ))}
     </div>
   );
 }
