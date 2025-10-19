@@ -1,35 +1,37 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react";
+import axios from "axios";
+import TaskForm from "./components/TaskForm";
+import TaskList from "./components/TaskList";
 
-function App() {
-  const [count, setCount] = useState(0)
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+export default function App() {
+  const [tasks, setTasks] = useState([]);
+
+  useEffect(() => {
+    axios.get(`${API_URL}/tasks`).then(res => setTasks(res.data));
+  }, []);
+
+  const addTask = async (title) => {
+    const res = await axios.post(`${API_URL}/tasks`, { title });
+    setTasks([res.data, ...tasks]);
+  };
+
+  const toggleTask = async (id, completed) => {
+    const res = await axios.put(`${API_URL}/tasks/${id}`, { completed: !completed });
+    setTasks(tasks.map(t => t._id === id ? res.data : t));
+  };
+
+  const deleteTask = async (id) => {
+    await axios.delete(`${API_URL}/tasks/${id}`);
+    setTasks(tasks.filter(t => t._id !== id));
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-4">
+      <h1 className="text-3xl font-bold text-gray-800 my-4">Task Manager</h1>
+      <TaskForm onAdd={addTask} />
+      <TaskList tasks={tasks} onToggle={toggleTask} onDelete={deleteTask} />
+    </div>
+  );
 }
-
-export default App
