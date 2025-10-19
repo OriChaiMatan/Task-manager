@@ -7,9 +7,17 @@ export default function App() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [filter, setFilter] = useState("all"); // ✅ חדש
+  const [filter, setFilter] = useState("all");
+  const [theme, setTheme] = useState("light"); // ✅ מצב תאורה
 
-  // טעינה ראשונית
+  // טעינת נושא צבעים
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme") || "light";
+    setTheme(savedTheme);
+    document.body.className = savedTheme === "dark" ? "bg-dark text-light" : "bg-light text-dark";
+  }, []);
+
+  // טעינת משימות
   useEffect(() => {
     const savedTasks = localStorage.getItem("tasks");
     if (savedTasks) {
@@ -22,8 +30,7 @@ export default function App() {
         const res = await getTasks();
         setTasks(res.data);
         localStorage.setItem("tasks", JSON.stringify(res.data));
-      } catch (err) {
-        console.error("❌ Failed to fetch tasks:", err);
+      } catch {
         setError("לא ניתן לטעון את המשימות מהשרת");
       } finally {
         setLoading(false);
@@ -37,6 +44,14 @@ export default function App() {
       localStorage.setItem("tasks", JSON.stringify(tasks));
     }
   }, [tasks]);
+
+  // ✅ החלפת נושא
+  const toggleTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+    document.body.className = newTheme === "dark" ? "bg-dark text-light" : "bg-light text-dark";
+  };
 
   const addTask = async (title) => {
     try {
@@ -71,7 +86,6 @@ export default function App() {
     }
   };
 
-  // ✅ מסנן לפי סוג המשימות
   const filteredTasks = tasks.filter((task) => {
     if (filter === "completed") return task.completed;
     if (filter === "pending") return !task.completed;
@@ -79,13 +93,20 @@ export default function App() {
   });
 
   return (
-    <div className="min-vh-100 bg-light py-5">
+    <div className={`min-vh-100 py-5 transition ${theme === "dark" ? "bg-dark text-light" : "bg-light text-dark"}`}>
       <div className="container" style={{ maxWidth: "600px" }}>
-        <h1 className="text-center mb-4 fw-bold text-primary">Task Manager</h1>
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h1 className="fw-bold">Task Manager</h1>
+          <button
+            className={`btn btn-sm ${theme === "dark" ? "btn-light" : "btn-dark"}`}
+            onClick={toggleTheme}
+          >
+            {theme === "dark" ? "☀️ Light" : "🌙 Dark"}
+          </button>
+        </div>
 
         <TaskForm onAdd={addTask} />
 
-        {/* ✅ כפתורי פילטר */}
         <div className="d-flex justify-content-center gap-2 mb-4">
           <button
             className={`btn ${filter === "all" ? "btn-primary" : "btn-outline-primary"}`}
