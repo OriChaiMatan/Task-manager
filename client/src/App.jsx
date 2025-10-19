@@ -10,7 +10,7 @@ export default function App() {
   const [filter, setFilter] = useState("all");
   const [theme, setTheme] = useState("light");
 
-  // ✅ טוען נושא עיצוב מה-localStorage
+  // --- טוען נושא עיצוב
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") || "light";
     setTheme(savedTheme);
@@ -18,7 +18,7 @@ export default function App() {
       savedTheme === "dark" ? "bg-dark text-light" : "bg-light text-dark";
   }, []);
 
-  // ✅ טוען משימות מהשרת (וגיבוי מ-localStorage)
+  // --- טוען משימות
   useEffect(() => {
     const savedTasks = localStorage.getItem("tasks");
     if (savedTasks) {
@@ -40,12 +40,11 @@ export default function App() {
     fetchTasks();
   }, []);
 
-  // ✅ שומר ב-localStorage בכל שינוי
   useEffect(() => {
     localStorage.setItem("tasks", JSON.stringify(tasks));
   }, [tasks]);
 
-  // ✅ החלפת מצב כהה/בהיר
+  // --- החלפת מצב כהה/בהיר
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
@@ -54,7 +53,7 @@ export default function App() {
       newTheme === "dark" ? "bg-dark text-light" : "bg-light text-dark";
   };
 
-  // ✅ הוספת משימה
+  // --- CRUD פעולות
   const addTask = async (title) => {
     try {
       const res = await createTask(title);
@@ -66,7 +65,6 @@ export default function App() {
     }
   };
 
-  // ✅ שינוי סטטוס משימה
   const toggleTask = async (id, completed) => {
     try {
       const res = await updateTask(id, { completed: !completed });
@@ -78,7 +76,6 @@ export default function App() {
     }
   };
 
-  // ✅ מחיקת משימה
   const removeTask = async (id) => {
     try {
       await deleteTask(id);
@@ -90,7 +87,6 @@ export default function App() {
     }
   };
 
-  // ✅ עריכת משימה במקום
   const editTask = async (id, newTitle) => {
     try {
       const res = await updateTask(id, { title: newTitle });
@@ -102,14 +98,18 @@ export default function App() {
     }
   };
 
-  // ✅ סינון משימות
+  // --- סינון משימות
   const filteredTasks = tasks.filter((task) => {
     if (filter === "completed") return task.completed;
     if (filter === "pending") return !task.completed;
     return true;
   });
 
-  // ✅ תצוגה
+  // --- חישובי ספירה בזמן אמת
+  const total = tasks.length;
+  const completed = tasks.filter((t) => t.completed).length;
+  const pending = total - completed;
+
   return (
     <div
       className={`min-vh-100 py-5 ${
@@ -117,7 +117,7 @@ export default function App() {
       }`}
     >
       <div className="container" style={{ maxWidth: "600px" }}>
-        {/* כותרת + כפתור מצב תאורה */}
+        {/* כותרת + מצב תאורה */}
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h1 className="fw-bold">Task Manager</h1>
           <button
@@ -133,8 +133,8 @@ export default function App() {
         {/* טופס הוספה */}
         <TaskForm onAdd={addTask} />
 
-        {/* סינון */}
-        <div className="d-flex justify-content-center gap-2 mb-4">
+        {/* מסננים */}
+        <div className="d-flex justify-content-center gap-2 mb-3">
           <button
             className={`btn ${
               filter === "all" ? "btn-primary" : "btn-outline-primary"
@@ -159,6 +159,19 @@ export default function App() {
           >
             Completed
           </button>
+        </div>
+
+        {/* ✅ פס סטטיסטיקה */}
+        <div className="text-center mb-4">
+          <span className="badge bg-secondary me-2">
+            סה״כ: {total}
+          </span>
+          <span className="badge bg-success me-2">
+            הושלמו: {completed}
+          </span>
+          <span className="badge bg-warning text-dark">
+            פתוחות: {pending}
+          </span>
         </div>
 
         {/* הודעות מצב */}
